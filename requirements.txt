@@ -1,6 +1,7 @@
+
 fastapi
 uvicorn
-openai
 python-multipart
 python-dotenv
 aiofiles
+requests

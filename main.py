@@ -1,9 +1,8 @@
+
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-import openai
-import base64
-import os
+import requests
 import json
 
 app = FastAPI()
@@ -23,62 +22,41 @@ def root():
 
 @app.post("/analyze-image")
 async def analyze_image(file: UploadFile = File(...)):
-    OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-    if not OPENAI_API_KEY:
-        raise Exception("OPENAI_API_KEY is missing from environment variables")
-
-    openai.api_key = OPENAI_API_KEY
-
-    contents = await file.read()
-    base64_image = base64.b64encode(contents).decode("utf-8")
-
-    response = openai.chat.completions.create(
-        model="gpt-4-turbo-2024-04-09",
-        messages=[
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": (
-                            "You're helping list an item on a peer-to-peer rental app. "
-                            "Please analyze the image and provide the following in JSON:\n"
-                            "- title (short, clear)\n"
-                            "- brand (if visible)\n"
-                            "- description (brief but helpful)\n"
-                            "- condition (Brand new, Used - like new, Used - good, Used - fair)\n"
-                            "- category (one of: sport, electronics, tools, home, garden, camping, pets, party, furniture, fashion, costumes, other)\n"
-                            "- tags (list of 3–6 relevant words)"
-                        )
-                    },
-                    {
-                        "type": "image_url",
-                        "image_url": {
-                            "url": f"data:image/jpeg;base64,{base64_image}"
-                        }
-                    }
-                ]
-            }
-        ],
-        max_tokens=500
-    )
-
-    import re
-
-    result = response.choices[0].message.content.strip()
-
-    # Remove triple backticks if present
-    if result.startswith("```"):
-        result = re.sub(r"^```(?:json)?|```$", "", result, flags=re.MULTILINE).strip()
-
-    print("🧠 GPT-4 Response:\n", result)
-
     try:
-        parsed = json.loads(result)
-        return JSONResponse(content=parsed)
-    except:
-        return JSONResponse(content={"raw": result})
-
+        # Read file contents
+        file_contents = await file.read()
+        
+        # Create form data with the file
+        files = {'file': (file.filename, file_contents, file.content_type)}
+        
+        # Make request to the new endpoint
+        response = requests.post(
+            'https://lendr-backend.onrender.com/analyze-image',
+            files=files
+        )
+        
+        # Parse the response
+        data = response.json()
+        
+        # If we got raw JSON string, try to parse it
+        if 'raw' in data:
+            try:
+                # Try to parse the raw string as JSON
+                parsed_data = json.loads(data['raw'])
+                return JSONResponse(content=parsed_data)
+            except json.JSONDecodeError:
+                # If parsing fails, return the raw response
+                return JSONResponse(content=data)
+        
+        # If we already have parsed JSON, return it directly
+        return JSONResponse(content=data)
+        
+    except Exception as e:
+        print(f"Error processing image: {str(e)}")
+        return JSONResponse(
+            content={"error": "Failed to process image"},
+            status_code=500
+        )
 
 if __name__ == "__main__":
     import uvicorn
