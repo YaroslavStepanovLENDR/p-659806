@@ -17,11 +17,13 @@ export default function UploadImage() {
     setResult(data)
   }
 
-  return (
-    <div style={{ padding: 20 }}>
-      <h2>Upload Image to LENDR</h2>
-      <input type="file" onChange={handleUpload} />
-      {result && <pre>{JSON.stringify(result, null, 2)}</pre>}
-    </div>
-  )
+return (
+  <div style={{ padding: 20, backgroundColor: "lightblue", minHeight: "100vh" }}>
+    <h1>🚀 THIS IS THE NEW VERSION</h1>
+    <h2>Upload Image to LENDR</h2>
+    <input type="file" onChange={handleUpload} />
+    {result && <pre>{JSON.stringify(result, null, 2)}</pre>}
+  </div>
+)
+
 }
