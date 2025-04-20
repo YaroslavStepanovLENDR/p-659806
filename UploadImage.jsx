@@ -8,10 +8,11 @@ export default function UploadImage() {
     const formData = new FormData()
     formData.append('file', file)
 
-    const res = await fetch('https://lendr-backend.onrender.com/analyze-image', {
-      method: 'POST',
-      body: formData
-    })
+const res = await fetch("https://lendr-backend.onrender.com/analyze-image", {
+  method: "POST",
+  body: formData
+});
+
 
     const data = await res.json()
     setResult(data)
