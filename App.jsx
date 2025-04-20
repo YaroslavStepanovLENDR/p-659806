@@ -7,4 +7,5 @@ export default function App() {
       <p>If you see this, the frontend loads successfully.</p>
     </div>
   )
+  // Force Lovable rebuild
 }
