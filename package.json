@@ -1,5 +1,6 @@
+
 {
-  "name": "lendr-frontend",
+  "name": "lendr-ui",
   "version": "1.0.0",
   "scripts": {
     "dev": "vite",
@@ -11,7 +12,7 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "vite": "^5.0.0",
-    "@vitejs/plugin-react": "^4.0.0"
+    "@vitejs/plugin-react": "^4.0.0",
+    "vite": "^5.0.0"
   }
 }
