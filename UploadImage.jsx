@@ -4,9 +4,22 @@ export default function UploadImage() {
   const [selectedImage, setSelectedImage] = useState(null);
   const [responseData, setResponseData] = useState(null);
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) {
+      console.error("No file selected");
+      return;
+    }
+
+    setSelectedImage(URL.createObjectURL(file));
+    handleUpload(file);
+  };
+
   const handleUpload = async (file) => {
     const formData = new FormData();
-    formData.append("file", file);
+    formData.append("file", file); // 👈 must be named "file"
+
+    console.log("Uploading file:", file);
 
     try {
       const response = await fetch("https://lendr-backend.onrender.com/analyze-image", {
@@ -14,22 +27,18 @@ export default function UploadImage() {
         body: formData,
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`API error ${response.status}: ${errorText}`);
+      }
+
       const result = await response.json();
       const data = result.raw ? JSON.parse(result.raw) : result;
 
-      console.log("Parsed response:", data);
-      setResponseData(data); // 💡 This sets the result so it's displayed below
+      console.log("Parsed result:", data);
+      setResponseData(data);
     } catch (error) {
       console.error("Upload failed:", error);
-    }
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setSelectedImage(imageUrl);
-      handleUpload(file); // ⬅️ Triggers backend analysis
     }
   };
 
