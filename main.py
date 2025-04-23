@@ -54,7 +54,7 @@ async def analyze_image(file: UploadFile = File(...)):
     except Exception as e:
         print(f"Error processing image: {str(e)}")
         return JSONResponse(
-            content={"error": "Failed to process image"},
+            content={"error": "Failed to process image Tatatatta"},
             status_code=500
         )
 
