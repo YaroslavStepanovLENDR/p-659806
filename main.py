@@ -41,7 +41,7 @@ async def analyze_image(file: UploadFile = File(...)):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4-vision-preview",
+            model="gpt-4o",
             messages=[
                 {
                     "role": "user",
