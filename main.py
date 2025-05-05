@@ -5,6 +5,7 @@ from openai import OpenAI
 import base64
 import os
 import traceback
+import json
 
 app = FastAPI()
 
@@ -54,8 +55,11 @@ async def analyze_image(file: UploadFile = File(...)):
         )
 
         result = response.choices[0].message.content
-        return JSONResponse(content=result)
+        parsed = json.loads(result)  # 🔧 this is now properly indented
+        return JSONResponse(content=parsed)
 
+    except json.JSONDecodeError:
+        return JSONResponse(content={"error": "Invalid JSON from OpenAI"}, status_code=500)
     except Exception as e:
         traceback.print_exc()
         return JSONResponse(content={"error": str(e)}, status_code=500)
