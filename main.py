@@ -53,6 +53,7 @@ async def analyze_image(file: UploadFile = File(...)):
             max_tokens=500
         )
         result = response.choices[0].message.content
+        print("🔍 Parsed response to frontend:", parsed)
         return JSONResponse(content=result)
 
     except Exception as e:
