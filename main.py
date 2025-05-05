@@ -56,5 +56,8 @@ async def analyze_image(file: UploadFile = File(...)):
         print("🔍 Parsed response to frontend:", parsed)
         return JSONResponse(content=result)
 
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+except Exception as e:
+    import traceback
+    traceback.print_exc()
+    return JSONResponse(content={"error": str(e)}, status_code=500)
+
