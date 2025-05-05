@@ -1,13 +1,11 @@
-
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-import requests
 import json
+import requests
 
 app = FastAPI()
 
-# Enable CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -22,45 +20,33 @@ def root():
 
 @app.post("/analyze-image")
 async def analyze_image(file: UploadFile = File(...)):
+    if file is None:
+        return JSONResponse(content={"error": "No file received"}, status_code=400)
+
+    contents = await file.read()
+
+    files = {
+        "file": (file.filename, contents, "image/jpeg")
+    }
+
     try:
-        # Read file contents
-        file_contents = await file.read()
-        
-        # Create form data with the file
-        files = {'file': (file.filename, file_contents, file.content_type)}
-        
-        # Make request to the new endpoint
-        response = requests.post(
-            'https://lendr-backend.onrender.com/analyze-image',
-            files=files
-        )
-        
-        # Parse the response
-        data = response.json()
-        
-        # If we got raw JSON string, try to parse it
-        if 'raw' in data:
-            try:
-                # Try to parse the raw string as JSON
-                parsed_data = json.loads(data['raw'])
-                return JSONResponse(content=parsed_data)
-            except json.JSONDecodeError:
-                # If parsing fails, return the raw response
-                return JSONResponse(content=data)
-        
-        # If we already have parsed JSON, return it directly
-        return JSONResponse(content=data)
-        
+        # Replace with actual model or processing
+        result = {
+            "title": "Mountain Bike",
+            "brand": "Giant",
+            "description": "A blue aluminum mountain bike with 21 speeds.",
+            "condition": "Used - good",
+            "category": "Sport",
+            "tags": ["bike", "mountain", "gear"]
+        }
+
+        return JSONResponse(content=result)
+
     except Exception as e:
-        print(f"Error processing image: {str(e)}")
-        return JSONResponse(
-            content={"error": "Failed to process image Tatatatta"},
-            status_code=500
-        )
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 if __name__ == "__main__":
-    import uvicorn
     import os
+    import uvicorn
     port = int(os.environ.get("PORT", 10000))
     uvicorn.run("main:app", host="0.0.0.0", port=port)
-
