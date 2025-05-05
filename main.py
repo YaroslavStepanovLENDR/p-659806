@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 import openai
 import base64
 import os
+import json
+import traceback
 
 app = FastAPI()
 
@@ -15,7 +17,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Load OpenAI API key from environment variable
 openai.api_key = os.environ.get("OPENAI_API_KEY")
 
 @app.post("/analyze-image")
@@ -23,22 +24,22 @@ async def analyze_image(file: UploadFile = File(...)):
     if file is None:
         return JSONResponse(content={"error": "No file received"}, status_code=400)
 
-    contents = await file.read()
-    b64_image = base64.b64encode(contents).decode("utf-8")
-
-    prompt = (
-        "You are helping someone catalog items for renting. "
-        "Please analyze the image and return a JSON with:\n"
-        "- title (string)\n"
-        "- brand (string or null)\n"
-        "- description (string)\n"
-        "- condition: one of [Brand new, Used - like new, Used - good, Used - fair]\n"
-        "- category: one of [sport, electronics, tools, home, garden, camping, pets, party, furniture, fashion, costumes, other]\n"
-        "- tags: array of keywords\n\n"
-        "Respond only with a JSON object, no extra text."
-    )
-
     try:
+        contents = await file.read()
+        b64_image = base64.b64encode(contents).decode("utf-8")
+
+        prompt = (
+            "You are helping someone catalog items for renting. "
+            "Please analyze the image and return a JSON with:\n"
+            "- title (string)\n"
+            "- brand (string or null)\n"
+            "- description (string)\n"
+            "- condition: one of [Brand new, Used - like new, Used - good, Used - fair]\n"
+            "- category: one of [sport, electronics, tools, home, garden, camping, pets, party, furniture, fashion, costumes, other]\n"
+            "- tags: array of keywords\n\n"
+            "Respond only with a JSON object, no extra text."
+        )
+
         response = openai.ChatCompletion.create(
             model="gpt-4-vision-preview",
             messages=[
@@ -52,12 +53,12 @@ async def analyze_image(file: UploadFile = File(...)):
             ],
             max_tokens=500
         )
+
         result = response.choices[0].message.content
+        parsed = json.loads(result)  # 🛠️ FIX: now it's a Python dict
         print("🔍 Parsed response to frontend:", parsed)
-        return JSONResponse(content=result)
+        return JSONResponse(content=parsed)
 
-except Exception as e:
-    import traceback
-    traceback.print_exc()
-    return JSONResponse(content={"error": str(e)}, status_code=500)
-
+    except Exception as e:
+        traceback.print_exc()
+        return JSONResponse(content={"error": str(e)}, status_code=500)
