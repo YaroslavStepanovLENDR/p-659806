@@ -55,7 +55,10 @@ async def analyze_image(file: UploadFile = File(...)):
         )
 
         result = response.choices[0].message.content
-        parsed = json.loads(result)  # 🔧 this is now properly indented
+print("🧾 Raw response from OpenAI:\n", result)  # <--- Add this
+
+parsed = json.loads(result)
+
         return JSONResponse(content=parsed)
 
     except json.JSONDecodeError:
