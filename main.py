@@ -55,14 +55,13 @@ async def analyze_image(file: UploadFile = File(...)):
         )
 
         result = response.choices[0].message.content
-print("🧾 Raw response from OpenAI:\n", result)  # <--- Add this
-
-parsed = json.loads(result)
-
+        print("🧾 Raw response from OpenAI:\n", result)  # DEBUG LOG
+        parsed = json.loads(result)
         return JSONResponse(content=parsed)
 
     except json.JSONDecodeError:
         return JSONResponse(content={"error": "Invalid JSON from OpenAI"}, status_code=500)
+
     except Exception as e:
         traceback.print_exc()
         return JSONResponse(content={"error": str(e)}, status_code=500)
