@@ -22,11 +22,19 @@ def root():
 
 @app.post("/analyze-image")
 async def analyze_image(file: UploadFile = File(...)):
+    print("✅ /analyze-image endpoint hit")
+
     if file is None:
+        print("❌ No file received")
         return JSONResponse(content={"error": "No file received"}, status_code=400)
 
-    contents = await file.read()
-    b64_image = base64.b64encode(contents).decode("utf-8")
+    try:
+        contents = await file.read()
+        print(f"📷 File read successfully, size: {len(contents)} bytes")
+        b64_image = base64.b64encode(contents).decode("utf-8")
+    except Exception as file_err:
+        print("❌ Error reading file:", file_err)
+        return JSONResponse(content={"error": "Failed to read uploaded file"}, status_code=500)
 
     prompt = (
         "You are helping someone catalog items for renting. "
@@ -41,6 +49,7 @@ async def analyze_image(file: UploadFile = File(...)):
     )
 
     try:
+        print("📡 Sending request to OpenAI...")
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -52,20 +61,21 @@ async def analyze_image(file: UploadFile = File(...)):
                     ]
                 }
             ],
-            max_tokens=500
-            timeout=30 
+            max_tokens=500,
+            timeout=30  # Prevent hanging
         )
 
         result = response.choices[0].message.content
-        print("🧾 Raw response from OpenAI:\n", result)
+        print("🧾 Raw OpenAI response:", result)
 
         try:
             parsed = json.loads(result)
             return JSONResponse(content=parsed)
         except json.JSONDecodeError:
-            print("❌ Failed to parse OpenAI JSON. Returning raw text.")
+            print("❌ Failed to parse OpenAI JSON")
             return JSONResponse(content={"error": "Invalid JSON", "raw": result}, status_code=500)
 
     except Exception as e:
+        print("❌ Exception during OpenAI call:")
         traceback.print_exc()
         return JSONResponse(content={"error": str(e)}, status_code=500)
