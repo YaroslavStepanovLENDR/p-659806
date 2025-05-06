@@ -1,10 +1,7 @@
-
 fastapi
 uvicorn
 python-multipart
 python-dotenv
 aiofiles
 requests
-openai
-openai==1.6.1
-
+openai==0.28.1
