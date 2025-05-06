@@ -6,4 +6,5 @@ python-dotenv
 aiofiles
 requests
 openai
+openai==1.3.5
 
