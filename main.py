@@ -9,6 +9,7 @@ import json
 
 app = FastAPI()
 
+# Allow cross-origin requests from any frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,12 +18,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Initialize OpenAI client with the API key from environment
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
+# Root endpoint for Render health check
 @app.get("/")
 def root():
     return {"status": "Backend running"}
 
+# Main AI image processing endpoint
 @app.post("/analyze-image")
 async def analyze_image(file: UploadFile = File(...)):
     if file is None:
