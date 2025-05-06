@@ -19,10 +19,11 @@ app.add_middleware(
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-@app.post("/analyze-image")
 @app.get("/")
 def root():
     return {"status": "Backend running"}
+
+@app.post("/analyze-image")
 async def analyze_image(file: UploadFile = File(...)):
     if file is None:
         return JSONResponse(content={"error": "No file received"}, status_code=400)
@@ -58,12 +59,14 @@ async def analyze_image(file: UploadFile = File(...)):
         )
 
         result = response.choices[0].message.content
-        print("🧾 Raw response from OpenAI:\n", result)  # DEBUG LOG
-        parsed = json.loads(result)
-        return JSONResponse(content=parsed)
+        print("🧾 Raw response from OpenAI:\n", result)
 
-    except json.JSONDecodeError:
-        return JSONResponse(content={"error": "Invalid JSON from OpenAI"}, status_code=500)
+        try:
+            parsed = json.loads(result)
+            return JSONResponse(content=parsed)
+        except json.JSONDecodeError:
+            print("❌ Failed to parse OpenAI JSON. Returning raw text.")
+            return JSONResponse(content={"error": "Invalid JSON", "raw": result}, status_code=500)
 
     except Exception as e:
         traceback.print_exc()
