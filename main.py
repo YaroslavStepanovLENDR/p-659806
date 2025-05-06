@@ -14,19 +14,25 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Initialize OpenAI client
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 @app.get("/")
 def root():
     return {"status": "Backend running"}
 
-@app.post("/analyze-image")  # ✅ properly applied
+@app.post("/analyze-image")
 async def analyze_image(file: UploadFile = File(...)):
     if file is None:
+        print("❌ No file received.")
         return JSONResponse(content={"error": "No file received"}, status_code=400)
 
+    print("📥 Reading file...")
     contents = await file.read()
+    print(f"📦 File size: {len(contents)} bytes")
+
     b64_image = base64.b64encode(contents).decode("utf-8")
+    print("📸 Encoded image to base64.")
 
     prompt = (
         "You are helping someone catalog items for renting. "
@@ -41,6 +47,7 @@ async def analyze_image(file: UploadFile = File(...)):
     )
 
     try:
+        print("🧠 Sending request to OpenAI...")
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -56,15 +63,17 @@ async def analyze_image(file: UploadFile = File(...)):
         )
 
         result = response.choices[0].message.content
-        print("🧾 Raw response from OpenAI:\n", result)
+        print("🧾 OpenAI response:\n", result)
 
         try:
             parsed = json.loads(result)
+            print("✅ JSON parsed.")
             return JSONResponse(content=parsed)
         except json.JSONDecodeError:
-            print("❌ Failed to parse OpenAI JSON. Returning raw text.")
+            print("❌ Failed to parse OpenAI JSON.")
             return JSONResponse(content={"error": "Invalid JSON", "raw": result}, status_code=500)
 
     except Exception as e:
+        print("🔥 Exception during OpenAI call:", str(e))
         traceback.print_exc()
         return JSONResponse(content={"error": str(e)}, status_code=500)
