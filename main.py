@@ -20,6 +20,9 @@ app.add_middleware(
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 @app.post("/analyze-image")
+@app.get("/")
+def root():
+    return {"status": "Backend running"}
 async def analyze_image(file: UploadFile = File(...)):
     if file is None:
         return JSONResponse(content={"error": "No file received"}, status_code=400)
