@@ -53,6 +53,7 @@ async def analyze_image(file: UploadFile = File(...)):
                 }
             ],
             max_tokens=500
+            timeout=30 
         )
 
         result = response.choices[0].message.content
