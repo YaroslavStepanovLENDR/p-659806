@@ -23,6 +23,8 @@ def root():
 
 @app.post("/analyze-image")
 async def analyze_image(file: UploadFile = File(...)):
+    print("📩 Endpoint hit!")
+
     if file is None:
         print("❌ No file received.")
         return JSONResponse(content={"error": "No file received"}, status_code=400)
@@ -32,7 +34,8 @@ async def analyze_image(file: UploadFile = File(...)):
     print(f"📦 File size: {len(contents)} bytes")
 
     b64_image = base64.b64encode(contents).decode("utf-8")
-    print("📸 Encoded image to base64.")
+    print("📸 Base64 encoding complete.")
+
 
     prompt = (
         "You are helping someone catalog items for renting. "
