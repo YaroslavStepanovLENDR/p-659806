@@ -20,7 +20,7 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 def root():
     return {"status": "Backend running"}
 
-@app.post("/analyze-image")
+@app.post("/analyze-image")  # ✅ properly applied
 async def analyze_image(file: UploadFile = File(...)):
     if file is None:
         return JSONResponse(content={"error": "No file received"}, status_code=400)
