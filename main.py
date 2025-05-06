@@ -2,10 +2,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
-import base64
-import os
-import traceback
-import json
+import base64, os, traceback, json
 
 app = FastAPI()
 
