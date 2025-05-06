@@ -1,9 +1,3 @@
-from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import JSONResponse
-from fastapi.middleware.cors import CORSMiddleware
-from openai import OpenAI
-import base64, os, traceback, json
-
 app = FastAPI()
 
 app.add_middleware(
@@ -13,6 +7,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+from fastapi import FastAPI, UploadFile, File
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from openai import OpenAI
+import base64, os, traceback, json
+
 
 # Initialize OpenAI client
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
