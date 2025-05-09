@@ -2,7 +2,7 @@ app = "p-659806"
 primary_region = "cdg"
 
 [build]
-image = "Dockerfile"
+dockerfile = "Dockerfile"
 
 [env]
 PORT = "8000"
