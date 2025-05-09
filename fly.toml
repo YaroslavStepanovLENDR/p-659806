@@ -1,0 +1,8 @@
+app = "p-659806"
+primary_region = "cdg"
+
+[build]
+dockerfile = "Dockerfile"
+
+[env]
+PORT = "8080"  # or "8000" if that’s what you’re using in Dockerfile
