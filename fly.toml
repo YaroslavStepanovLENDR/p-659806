@@ -5,4 +5,10 @@ primary_region = "cdg"
 image = "Dockerfile"
 
 [env]
-PORT = "8080"  # or "8000" if that’s what you’re using in Dockerfile
+PORT = "8000"
+
+[http_service]
+internal_port = 8000
+force_https = true
+auto_stop_machines = true
+auto_start_machines = true
