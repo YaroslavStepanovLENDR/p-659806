@@ -2,7 +2,7 @@ from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from openai import OpenAI
-import base64, os, traceback, json
+import base64, os, traceback, json, re
 
 app = FastAPI()
 
@@ -14,7 +14,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Create OpenAI client instance
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 @app.get("/")
@@ -52,7 +51,7 @@ async def analyze_image(file: UploadFile = File(...)):
     try:
         print("📡 Sending request to OpenAI...")
         response = client.chat.completions.create(
-           model="gpt-4o",
+            model="gpt-4o",
             messages=[
                 {
                     "role": "user",
@@ -68,17 +67,15 @@ async def analyze_image(file: UploadFile = File(...)):
         result = response.choices[0].message.content
         print("🧾 Raw OpenAI response:", result)
 
-import re
+        # Strip Markdown-style code block
+        cleaned = re.sub(r"^```(?:json)?|```$", "", result.strip(), flags=re.IGNORECASE).strip("` \n")
 
-try:
-    # Strip triple backticks and optional "json" label
-    cleaned = re.sub(r"^```json|```$", "", result.strip(), flags=re.IGNORECASE).strip("` \n")
-    parsed = json.loads(cleaned)
-    return JSONResponse(content=parsed)
-except json.JSONDecodeError:
-    print("❌ Failed to parse OpenAI JSON")
-    return JSONResponse(content={"error": "Invalid JSON", "raw": result}, status_code=500)
+        parsed = json.loads(cleaned)
+        return JSONResponse(content=parsed)
 
+    except json.JSONDecodeError:
+        print("❌ Failed to parse OpenAI JSON")
+        return JSONResponse(content={"error": "Invalid JSON", "raw": result}, status_code=500)
 
     except Exception as e:
         print("❌ Exception during OpenAI call:")
