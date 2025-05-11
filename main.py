@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-import openai
+from openai import OpenAI
 import base64, os, traceback, json
 
 app = FastAPI()
@@ -14,7 +14,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-openai.api_key = os.environ.get("OPENAI_API_KEY")
+# Create OpenAI client instance
+client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 @app.get("/")
 def root():
@@ -50,7 +51,7 @@ async def analyze_image(file: UploadFile = File(...)):
 
     try:
         print("📡 Sending request to OpenAI...")
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4-vision-preview",
             messages=[
                 {
@@ -61,8 +62,7 @@ async def analyze_image(file: UploadFile = File(...)):
                     ]
                 }
             ],
-            max_tokens=500,
-            # timeout=30  # Prevent hanging
+            max_tokens=500
         )
 
         result = response.choices[0].message.content
