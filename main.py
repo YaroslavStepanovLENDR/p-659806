@@ -68,12 +68,17 @@ async def analyze_image(file: UploadFile = File(...)):
         result = response.choices[0].message.content
         print("🧾 Raw OpenAI response:", result)
 
-        try:
-            parsed = json.loads(result)
-            return JSONResponse(content=parsed)
-        except json.JSONDecodeError:
-            print("❌ Failed to parse OpenAI JSON")
-            return JSONResponse(content={"error": "Invalid JSON", "raw": result}, status_code=500)
+import re
+
+try:
+    # Strip triple backticks and optional "json" label
+    cleaned = re.sub(r"^```json|```$", "", result.strip(), flags=re.IGNORECASE).strip("` \n")
+    parsed = json.loads(cleaned)
+    return JSONResponse(content=parsed)
+except json.JSONDecodeError:
+    print("❌ Failed to parse OpenAI JSON")
+    return JSONResponse(content={"error": "Invalid JSON", "raw": result}, status_code=500)
+
 
     except Exception as e:
         print("❌ Exception during OpenAI call:")
