@@ -52,7 +52,7 @@ async def analyze_image(file: UploadFile = File(...)):
     try:
         print("📡 Sending request to OpenAI...")
         response = client.chat.completions.create(
-            model="gpt-4-vision",
+           model="gpt-4o",
             messages=[
                 {
                     "role": "user",
