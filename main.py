@@ -16,7 +16,7 @@ app.add_middleware(
 
 client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 def root():
     return {"status": "Backend running"}
 
