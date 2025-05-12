@@ -18,7 +18,7 @@ client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
 @app.api_route("/", methods=["GET", "HEAD"])
 def root():
-    return {"status": "Backend running"}
+    return {"status": "Backend running test"}
 
 @app.post("/analyze-image")
 async def analyze_image(file: UploadFile = File(...)):
